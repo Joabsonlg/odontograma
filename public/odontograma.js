@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (infoDentePosicaoAtual.secao) {
             console.table(infoDentePosicaoAtual)
             let marcacoes = JSON.parse(localStorage.getItem('marcacoes_dentes') || '[]')
-            const jaAdicionado = marcacoes.find(marcacao => marcacao.numeroDente === infoDentePosicaoAtual.numeroDente && marcacao.secao == infoDentePosicaoAtual.secao) !== undefined
+            const jaAdicionado = marcacoes.find(marcacao => marcacao.numeroDente === infoDentePosicaoAtual.numeroDente && marcacao.secao === infoDentePosicaoAtual.secao) !== undefined
             if (!jaAdicionado) {
                 marcacoes.push(infoDentePosicaoAtual)
                 localStorage.setItem('marcacoes_dentes', JSON.stringify(marcacoes))
