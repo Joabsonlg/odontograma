@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odontograma</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="pincel.js"></script>
+    <script src="odontograma.js"></script>
+</head>
+
+<body>
+    <div id="control" class="container">
+        <div class="row">
+            <div class="col-6 mt-3">
+                <label for="pincel">Pincel</label>
+                <input id="pincel" type="checkbox">
+            </div>
+            <div class="col-6 mt-3">
+                <a href="#" class="btn btn-secondary btn-sm" id="saveBtn" role="button">Salvar imagem</a>
+            </div>
+        </div>
+    </div>
+    <div id="canva-group">
+        <canvas id="camada1Odontograma"></canvas>
+        <canvas id="camada2Odontograma"></canvas>
+        <canvas id="camada3Odontograma"></canvas>
+        <canvas id="camada4Odontograma"></canvas>
+
+        <canvas id="camadaPincel"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
