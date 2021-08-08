@@ -12,8 +12,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const camada4 = document.querySelector('#camada4Odontograma')
     const contexto4 = camada4.getContext('2d')
 
+    const modal = new bootstrap.Modal(document.getElementById('modal'))
+
     const margemXEntreDentes = 8
     const margemYEntreDentes = 100
+
+    const problemas = [{
+        nome: 'Lesão branca ativa de cárie',
+        cor: '#008000'
+    }, {
+        nome: 'Lesão branca inativa de cárie',
+        cor: '#FFFF00'
+    }, {
+        nome: 'Lesão de cárie cavitada',
+        cor: '#FF0000'
+    }, {
+        nome: 'Cárie paralisada/ pigmentação do sulco',
+        cor: '#000000'
+    }, {
+        nome: 'Restaurações em bom estado',
+        cor: '#0000FF'
+    }, {
+        nome: 'Restauração a ser trocada',
+        cor: '#FFC0CB'
+    }, {
+        nome: 'Extração indicada',
+        cor: '#F5F5DC'
+    }, {
+        nome: 'Necessidade de prótese fixa',
+        cor: '#A52A2A'
+    }, {
+        nome: 'Prótese fixa',
+        cor: '#FFA500'
+    }, {
+        nome: 'Dente ausente',
+        cor: '#800080'
+    }, {
+        nome: 'Lesão cervical não- cariosa',
+        cor: '#8B0000'
+    }, {
+        nome: 'Faceta de desgaste',
+        cor: '#FA8072'
+    }, {
+        nome: 'Limpar seção',
+        cor: '#FFFFFF'
+    }, {
+        nome: 'Outro',
+        cor: '#008080'
+    }]
+
     let tamanhoColuna = camada1.width / 16
     let tamanhoDente = tamanhoColuna - (2 * margemXEntreDentes)
 
@@ -27,18 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
         baseMenor: (tamanhoDente / 4) * 3
     }
 
+    let infoDentePosicaoAtual = {
+        numeroDente: 0,
+        secao: 0,
+        indice: 0,
+        cor: ''
+    }
+
     const posicaoYInicialDente = 20
-
-    const registros = [{
-        dente: 11,
-        problema: {
-            nome: 'Restauração a ser trocada',
-            cor: 'teal',
-            secao: 5
-        }
-    }]
-
-    console.table(registros)
 
     const definePosicaoXInicialDente = (index) => {
         if (index === 0) return (index * tamanhoDente) + (margemXEntreDentes * index) + margemXEntreDentes;
@@ -178,10 +221,11 @@ document.addEventListener('DOMContentLoaded', () => {
         x -= camada1.offsetLeft
         y -= camada1.offsetTop
 
-        let infoDentePosicaoAtual = {
+        infoDentePosicaoAtual = {
             numeroDente: 0,
             secao: 0,
-            indice: 0
+            indice: 0,
+            cor: ''
         }
 
         infoDentePosicaoAtual = getInfoDentePosicaoatual(infoDentePosicaoAtual, x, y)
@@ -205,24 +249,16 @@ document.addEventListener('DOMContentLoaded', () => {
         x -= camada1.offsetLeft
         y -= camada1.offsetTop
 
-        let infoDentePosicaoAtual = {
+        infoDentePosicaoAtual = {
             numeroDente: 0,
             secao: 0,
-            indice: 0
+            indice: 0,
+            cor: ''
         }
 
         infoDentePosicaoAtual = getInfoDentePosicaoatual(infoDentePosicaoAtual, x, y)
 
-        if (infoDentePosicaoAtual.secao) {
-            console.table(infoDentePosicaoAtual)
-            let marcacoes = JSON.parse(localStorage.getItem('marcacoes_dentes') || '[]')
-            const jaAdicionado = marcacoes.find(marcacao => marcacao.numeroDente === infoDentePosicaoAtual.numeroDente && marcacao.secao === infoDentePosicaoAtual.secao) !== undefined
-            if (!jaAdicionado) {
-                marcacoes.push(infoDentePosicaoAtual)
-                localStorage.setItem('marcacoes_dentes', JSON.stringify(marcacoes))
-                pintarSecao(contexto2, infoDentePosicaoAtual, 'black', 'yellow')
-            } else limparSecao(contexto2, infoDentePosicaoAtual)
-        }
+        if (infoDentePosicaoAtual.secao) modal.show()
     }
 
     const exibirEstrutura = () => {
@@ -321,16 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const limparSecao = (contexto, infoDentePosicaoAtual) => {
-        pintarSecao(contexto, infoDentePosicaoAtual, 'black', 'white')
-        let marcacoes = JSON.parse(localStorage.getItem('marcacoes_dentes') || '[]')
-        const marcacao = marcacoes.find(marcacao => marcacao.numeroDente === infoDentePosicaoAtual.numeroDente && marcacao.secao == infoDentePosicaoAtual.secao)
-        if (marcacao) {
-            marcacoes.splice(marcacoes.indexOf(marcacao), 1)
-            localStorage.setItem('marcacoes_dentes', JSON.stringify(marcacoes))
-        }
-    }
-
     const resizeCanvas = () => {
         if (window.innerWidth >= 800) {} else {
             alert("TELA MUITO PEQUENA! Acesse o odontrograma através de um dispositivo com uma tela maior!")
@@ -396,11 +422,43 @@ document.addEventListener('DOMContentLoaded', () => {
         let marcacoes = JSON.parse(localStorage.getItem('marcacoes_dentes') || '[]')
 
         marcacoes.forEach(element => {
-            pintarSecao(contexto2, element, 'black', 'yellow')
+            pintarSecao(contexto2, element, 'black', element.cor)
         });
     }
 
     resizeCanvas()
+
+    const options = problemas.map(problema => {
+        return `\n<option value='${problema.nome}'>${problema.nome}</option>`
+    })
+    document.querySelector("#problema").innerHTML += options
+
+    document.querySelector("#problema").addEventListener('change', (event) => {
+        let problema = event.target
+        if (problema.value) {
+            problema = problemas.find(problemaAtual => problemaAtual.nome === problema.value)
+            document.querySelector("#cor").value = problema.cor
+            if (problema.nome === 'Outro') document.querySelector("#cor").disabled = false
+            else document.querySelector("#cor").disabled = true
+        }
+    })
+
+    document.querySelector("#botaoSalvarMarcacao").onclick = (event) => {
+        let marcacoes = JSON.parse(localStorage.getItem('marcacoes_dentes') || '[]')
+        const marcacao = marcacoes.find(marcacao => marcacao.numeroDente === infoDentePosicaoAtual.numeroDente && marcacao.secao === infoDentePosicaoAtual.secao)
+        const procedimento = document.querySelector("#problema").value
+
+        infoDentePosicaoAtual.cor = document.querySelector("#cor").value
+        if (marcacao === undefined) marcacoes.push(infoDentePosicaoAtual)
+        else {
+            if (procedimento.value === 'Limpar seção') marcacoes.splice(marcacoes.indexOf(marcacao), 1)
+            else marcacoes[marcacoes.indexOf(marcacao)] = infoDentePosicaoAtual
+        }
+
+        localStorage.setItem('marcacoes_dentes', JSON.stringify(marcacoes))
+        pintarSecao(contexto2, infoDentePosicaoAtual, 'black', infoDentePosicaoAtual.cor)
+        modal.hide()
+    }
 
     window.addEventListener("resize", resizeCanvas)
 })

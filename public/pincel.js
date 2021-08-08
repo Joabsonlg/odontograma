@@ -23,6 +23,15 @@ document.addEventListener('DOMContentLoaded', () => {
         contexto2.stroke()
     }
 
+    const borracha = (coordenadas) => {
+        contexto2.lineWidth = 5
+        contexto.fillStyle = 'white'
+        contexto2.beginPath()
+        contexto2.moveTo(coordenadas.origem.x, coordenadas.origem.y)
+        contexto2.lineTo(coordenadas.destino.x, coordenadas.destino.y)
+        contexto2.stroke()
+    }
+
     document.querySelector("#pincel").addEventListener('change', function() {
         usaPincel()
     })

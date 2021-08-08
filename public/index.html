@@ -32,6 +32,34 @@
 
         <canvas id="camadaPincel"></canvas>
     </div>
+    <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Adicionar marcação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col-12 mb-2">
+                            <label for="problema">Problema</label>
+                            <select class="form-select" id="problema">
+                                <option selected>-- Selecione uma opção --</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-12">
+                            <label for="exampleColorInput" class="form-label">Cor da marcação</label>
+                            <input type="color" id="cor" disabled class="form-control form-control-color" id="exampleColorInput" value="#563d7c" title="Choose your color">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="botaoSalvarMarcacao">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
