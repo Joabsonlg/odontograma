@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Odontograma</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link rel="stylesheet" href="style.css" />
     <script src="pincel.js"></script>
     <script src="odontograma.js"></script>
@@ -15,12 +16,39 @@
 <body>
     <div id="control" class="container">
         <div class="row">
-            <div class="col-6 mt-3">
-                <label for="pincel">Pincel</label>
-                <input id="pincel" type="checkbox">
-            </div>
-            <div class="col-6 mt-3">
-                <a href="#" class="btn btn-secondary btn-sm" id="saveBtn" role="button">Salvar imagem</a>
+            <div class="col-md-4 mt-2">
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="ferramenta" id="mouse" autocomplete="off" checked>
+                    <label class="btn btn-secondary" for="mouse"><i class="fas fa-mouse-pointer"></i></label>
+
+                    <input class="btn-check" type="radio" name="ferramenta" id="pincel" value="option1">
+                    <label class="btn btn-secondary" for="pincel"><i class="fas fa-pencil-alt"></i></label>
+
+                    <input class="btn-check" type="radio" name="ferramenta" id="borracha" value="option2">
+                    <label class="btn btn-secondary" for="borracha"><i class="fas fa-eraser"></i></label>
+
+                </div>
+                <div class="btn-group" role="group">
+                    <button id="configBtn" type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                        <li style="margin: 5px;">
+                            <label for="customRange2" class="form-label">Tamanho</label>
+                            <input type="range" class="form-range" min="1" max="5" id="tamanhoPincel">
+                        </li>
+                        <li style="margin: 5px;">
+                            <label for="customRange2" class="form-label">Cor</label>
+                            <input type="color" id="corPincel" class="form-control form-control-color" value="#563d7c" title="Choose your color">
+                        </li>
+                        <li style="margin: 5px;">
+                            <button id="limparDesenho" type="button" class="btn btn-secondary">
+                                Limpar desenhos
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <button type="button" class="btn btn-secondary" id="saveBtn"><i class="fas fa-save"></i></button>
             </div>
         </div>
     </div>
@@ -49,13 +77,31 @@
                         </div>
                         <div class="form-group col-12">
                             <label for="exampleColorInput" class="form-label">Cor da marcação</label>
-                            <input type="color" id="cor" disabled class="form-control form-control-color" id="exampleColorInput" value="#563d7c" title="Choose your color">
+                            <input type="color" id="cor" disabled class="form-control form-control-color" value="#563d7c" title="Choose your color">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" id="botaoSalvarMarcacao">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="configuracoesFerramenta" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
                 </div>
             </div>
         </div>

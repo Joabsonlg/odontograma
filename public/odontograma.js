@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = new bootstrap.Modal(document.getElementById('modal'))
 
     const margemXEntreDentes = 8
-    const margemYEntreDentes = 100
+    const margemYEntreDentes = 200
 
     const problemas = [{
         nome: 'Lesão branca ativa de cárie',
@@ -81,7 +81,13 @@ document.addEventListener('DOMContentLoaded', () => {
         cor: ''
     }
 
-    const posicaoYInicialDente = 20
+    const posicaoYInicialDente = 180
+
+    base_image = new Image();
+    base_image.src = 'images/dentes/18.png';
+    base_image.onload = function() {
+        contexto1.drawImage(base_image, 24, 20, 70, 150);
+    }
 
     const definePosicaoXInicialDente = (index) => {
         if (index === 0) return (index * tamanhoDente) + (margemXEntreDentes * index) + margemXEntreDentes;
@@ -133,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let cor_linha = 'yellow';
         let posicaoY = 0
 
-        if (numeroDente < 16) posicaoY = 20;
+        if (numeroDente < 16) posicaoY = posicaoYInicialDente;
         else {
             numeroDente -= 16;
             posicaoY = dimensoesTrapezio.baseMaior + margemYEntreDentes + posicaoYInicialDente;
@@ -239,6 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else contexto3.clearRect(0, 0, camada3.width, camada3.height)
     }
 
+    camada4.touchstart = (event) => {
+        alert('touch')
+    }
+
     camada4.onclick = (event) => {
         const color = 'teal'
         const action = 'secao'
@@ -273,6 +283,41 @@ document.addEventListener('DOMContentLoaded', () => {
             const posicaoX = definePosicaoXInicialDente(index)
             desenharDente(posicaoX, margemYEntreDentes + tamanhoDente + posicaoYInicialDente)
         }
+
+        for (let index = 0; index < 16; index++) {
+            const posicaoX = definePosicaoXInicialQuadrado(index)
+            desenharQuadrado({
+                position: {
+                    x: posicaoX,
+                    y: 43 + tamanhoDente + posicaoYInicialDente
+                },
+                altura: tamanhoDente / 1.8,
+                largura: index === 0 || index === 15 ? tamanhoDente + margemXEntreDentes : tamanhoDente + 2 * margemXEntreDentes
+            })
+        }
+
+        for (let index = 0; index < 16; index++) {
+            const posicaoX = definePosicaoXInicialQuadrado(index)
+            desenharQuadrado({
+                position: {
+                    x: posicaoX,
+                    y: 43 + (tamanhoDente / 1.8) + tamanhoDente + posicaoYInicialDente
+                },
+                altura: tamanhoDente / 1.8,
+                largura: index === 0 || index === 15 ? tamanhoDente + margemXEntreDentes : tamanhoDente + 2 * margemXEntreDentes
+            })
+        }
+    }
+
+    const definePosicaoXInicialQuadrado = (index) => {
+        if (index === 0) return (index * tamanhoDente) + margemXEntreDentes;
+        else return (index * tamanhoDente) + (2 * index * margemXEntreDentes);
+    }
+
+    const desenharQuadrado = (quadrado) => {
+        contexto1.font = '40px serif'
+        contexto1.strokeRect(quadrado.position.x, quadrado.position.y, quadrado.largura, quadrado.altura)
+        contexto1.strokeText('18', quadrado.position.x + tamanhoDente / 2.8, quadrado.position.y + (tamanhoDente / 2.5));
     }
 
     const pintarSecao = (contexto, infoDentePosicaoAtual, cor_linha, cor_interior) => {
@@ -282,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let posicaoY = 0
 
-        if (numeroDente < 16) posicaoY = 20;
+        if (numeroDente < 16) posicaoY = posicaoYInicialDente;
         else {
             numeroDente -= 16;
             posicaoY = dimensoesTrapezio.baseMaior + margemYEntreDentes + posicaoYInicialDente;

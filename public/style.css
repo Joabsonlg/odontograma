@@ -15,11 +15,23 @@
 }
 
 #camadaPincel {
-    z-index: 0;
+    z-index: 3;
 }
 
 canvas {
     position: absolute;
     border: 1px solid #9C9898;
     margin: 10px;
+}
+
+.checked {
+    display: none;
+}
+
+.active .checked {
+    display: inline-block;
+}
+
+.active .unchecked {
+    display: none;
 }
