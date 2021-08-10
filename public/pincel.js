@@ -1,4 +1,4 @@
-window.onload = function() {
+document.addEventListener('DOMContentLoaded', () => {
     const pincel = {
         ativo: false,
         movendo: false,
@@ -25,17 +25,6 @@ window.onload = function() {
     const contexto = camadaPincel.getContext('2d')
     const saveBtn = document.getElementById("saveBtn");
 
-    camadaPincel.width = window.innerWidth - 25
-    camadaPincel.height = 600
-
-    const dataImage = localStorage.getItem('desenho')
-
-    desenho = new Image();
-    desenho.src = dataImage;
-    desenho.onload = function() {
-        contexto.drawImage(desenho, 0, 0, camadaPincel.width, camadaPincel.height);
-    }
-
     const desenhaLinha = (linha) => {
         contexto.lineWidth = pincel.espessura
         contexto.strokeStyle = pincel.cor
@@ -49,6 +38,7 @@ window.onload = function() {
         contexto.lineWidth = borracha.espessura
         contexto.clearRect(coordenadas.x - 7, coordenadas.y - 7, 15, 15);
     }
+
 
     document.querySelector("#mouse").addEventListener('change', function() {
         usaPincel()
@@ -71,7 +61,7 @@ window.onload = function() {
         const usarBorracha = document.getElementById("borracha").checked
         if (usarBorracha) {
             document.querySelector("#camadaPincel").style.zIndex = "5"
-            // document.querySelector("#configBtn").disabled = false
+            document.querySelector("#configBtn").disabled = false
             document.querySelector("#saveBtn").disabled = false
             ativo = true
         } else if (!document.getElementById("pincel").checked) {
@@ -159,4 +149,4 @@ window.onload = function() {
 
     document.querySelector("#tamanhoPincel").dispatchEvent(new Event('change'))
     document.querySelector("#corPincel").dispatchEvent(new Event('change'))
-}
+})

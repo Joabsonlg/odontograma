@@ -12,10 +12,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const camada4 = document.querySelector('#camada4Odontograma')
     const contexto4 = camada4.getContext('2d')
 
+    const camadaPincel = document.querySelector('#camadaPincel')
+    const contextoPincel = camadaPincel.getContext('2d')
+
     const modal = new bootstrap.Modal(document.getElementById('modal'))
 
-    const margemXEntreDentes = 8
-    const margemYEntreDentes = 200
+    let posicoesPadrao = {
+        posicaoYInicialDente: 180,
+        margemXEntreDentes: 8,
+        margemYEntreDentes: 200
+    }
+
+    const tamanhoTelaReferencia = 1895
+    const alturaTelaReferencia = 872
 
     const problemas = [{
         nome: 'Lesão branca ativa de cárie',
@@ -62,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }]
 
     let tamanhoColuna = camada1.width / 16
-    let tamanhoDente = tamanhoColuna - (2 * margemXEntreDentes)
+    let tamanhoDente = tamanhoColuna - (2 * posicoesPadrao.margemXEntreDentes)
 
     let dimensoesTrapezio = {
         // Base maior será a altura e largura do dente
@@ -81,17 +90,14 @@ document.addEventListener('DOMContentLoaded', () => {
         cor: ''
     }
 
-    const posicaoYInicialDente = 180
-
-    base_image = new Image();
-    base_image.src = 'images/dentes/18.png';
-    base_image.onload = function() {
-        contexto1.drawImage(base_image, 24, 20, 70, 150);
+    let numeroDentes = {
+        superior: ['18', '17', '16', '15', '14', '13', '12', '11', '21', '22', '23', '24', '25', '26', '27', '28'],
+        inferior: ['48', '47', '46', '45', '44', '43', '42', '41', '31', '32', '33', '34', '35', '36', '37', '38']
     }
 
     const definePosicaoXInicialDente = (index) => {
-        if (index === 0) return (index * tamanhoDente) + (margemXEntreDentes * index) + margemXEntreDentes;
-        else return (index * tamanhoDente) + (2 * margemXEntreDentes * index) + margemXEntreDentes;
+        if (index === 0) return (index * tamanhoDente) + (posicoesPadrao.margemXEntreDentes * index) + posicoesPadrao.margemXEntreDentes;
+        else return (index * tamanhoDente) + (2 * posicoesPadrao.margemXEntreDentes * index) + posicoesPadrao.margemXEntreDentes;
     }
 
     const desenharDente = (posicaoX, posicaoY) => {
@@ -139,10 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let cor_linha = 'yellow';
         let posicaoY = 0
 
-        if (numeroDente < 16) posicaoY = posicaoYInicialDente;
+        if (numeroDente < 16) posicaoY = posicoesPadrao.posicaoYInicialDente;
         else {
             numeroDente -= 16;
-            posicaoY = dimensoesTrapezio.baseMaior + margemYEntreDentes + posicaoYInicialDente;
+            posicaoY = dimensoesTrapezio.baseMaior + posicoesPadrao.margemYEntreDentes + posicoesPadrao.posicaoYInicialDente;
         }
 
         let posicaoX = definePosicaoXInicialDente(numeroDente)
@@ -276,48 +282,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (let index = 0; index < 16; index++) {
             const posicaoX = definePosicaoXInicialDente(index)
-            desenharDente(posicaoX, posicaoYInicialDente)
+            desenharDente(posicaoX, posicoesPadrao.posicaoYInicialDente)
         }
 
         for (let index = 0; index < 16; index++) {
             const posicaoX = definePosicaoXInicialDente(index)
-            desenharDente(posicaoX, margemYEntreDentes + tamanhoDente + posicaoYInicialDente)
+            desenharDente(posicaoX, posicoesPadrao.margemYEntreDentes + tamanhoDente + posicoesPadrao.posicaoYInicialDente)
         }
 
-        for (let index = 0; index < 16; index++) {
+        numeroDentes.superior.forEach((numero, index) => {
             const posicaoX = definePosicaoXInicialQuadrado(index)
-            desenharQuadrado({
+            desenharQuadradoNumDente({
                 position: {
                     x: posicaoX,
-                    y: 43 + tamanhoDente + posicaoYInicialDente
+                    y: (posicoesPadrao.margemYEntreDentes / 5) + tamanhoDente + posicoesPadrao.posicaoYInicialDente
                 },
+                primeiroOuUltimoDente: index === 0 || index === 15,
+                numeroDente: numero,
                 altura: tamanhoDente / 1.8,
-                largura: index === 0 || index === 15 ? tamanhoDente + margemXEntreDentes : tamanhoDente + 2 * margemXEntreDentes
+                largura: index === 0 || index === 15 ? tamanhoDente + posicoesPadrao.margemXEntreDentes : tamanhoDente + 2 * posicoesPadrao.margemXEntreDentes
             })
-        }
+        })
 
-        for (let index = 0; index < 16; index++) {
+        numeroDentes.inferior.forEach((numero, index) => {
             const posicaoX = definePosicaoXInicialQuadrado(index)
-            desenharQuadrado({
+            desenharQuadradoNumDente({
                 position: {
                     x: posicaoX,
-                    y: 43 + (tamanhoDente / 1.8) + tamanhoDente + posicaoYInicialDente
+                    y: (posicoesPadrao.margemYEntreDentes / 5) + (tamanhoDente / 1.8) + tamanhoDente + posicoesPadrao.posicaoYInicialDente
                 },
+                primeiroOuUltimoDente: index === 0 || index === 15,
+                numeroDente: numero,
                 altura: tamanhoDente / 1.8,
-                largura: index === 0 || index === 15 ? tamanhoDente + margemXEntreDentes : tamanhoDente + 2 * margemXEntreDentes
+                largura: index === 0 || index === 15 ? tamanhoDente + posicoesPadrao.margemXEntreDentes : tamanhoDente + 2 * posicoesPadrao.margemXEntreDentes
             })
-        }
+        })
     }
 
     const definePosicaoXInicialQuadrado = (index) => {
-        if (index === 0) return (index * tamanhoDente) + margemXEntreDentes;
-        else return (index * tamanhoDente) + (2 * index * margemXEntreDentes);
+        if (index === 0) return (index * tamanhoDente) + posicoesPadrao.margemXEntreDentes;
+        else return (index * tamanhoDente) + (2 * index * posicoesPadrao.margemXEntreDentes);
     }
 
-    const desenharQuadrado = (quadrado) => {
-        contexto1.font = '40px serif'
+    const desenharQuadradoNumDente = (quadrado) => {
+        let tamanhoFonte = (40 * (quadrado.primeiroOuUltimoDente ? quadrado.largura + posicoesPadrao.margemXEntreDentes : quadrado.largura)) / 118.4375
+        contexto1.font = `${tamanhoFonte}px arial`
         contexto1.strokeRect(quadrado.position.x, quadrado.position.y, quadrado.largura, quadrado.altura)
-        contexto1.strokeText('18', quadrado.position.x + tamanhoDente / 2.8, quadrado.position.y + (tamanhoDente / 2.5));
+        contexto1.fillText(quadrado.numeroDente, quadrado.position.x + tamanhoDente / 2.8, quadrado.position.y + (tamanhoDente / 2.5));
     }
 
     const pintarSecao = (contexto, infoDentePosicaoAtual, cor_linha, cor_interior) => {
@@ -327,10 +338,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let posicaoY = 0
 
-        if (numeroDente < 16) posicaoY = posicaoYInicialDente;
+        if (numeroDente < 16) posicaoY = posicoesPadrao.posicaoYInicialDente;
         else {
             numeroDente -= 16;
-            posicaoY = dimensoesTrapezio.baseMaior + margemYEntreDentes + posicaoYInicialDente;
+            posicaoY = dimensoesTrapezio.baseMaior + posicoesPadrao.margemYEntreDentes + posicoesPadrao.posicaoYInicialDente;
         }
 
         let posicaoX = definePosicaoXInicialDente(numeroDente)
@@ -407,11 +418,30 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("TELA MUITO PEQUENA! Acesse o odontrograma através de um dispositivo com uma tela maior!")
             // document.querySelector("#canva-group").style.display = 'none'
         }
+
         camada1.width = camada2.width = camada3.width = camada4.width = window.innerWidth - 25
-        camada1.height = camada2.height = camada3.height = camada4.height = 600
+        const altura = (camada1.width * alturaTelaReferencia) / tamanhoTelaReferencia
+        camada1.height = camada2.height = camada3.height = camada4.height = altura
+
+        valoresBase = {
+            x: (camada1.width * 24) / tamanhoTelaReferencia,
+            y: (camada1.width * 20) / tamanhoTelaReferencia,
+            largura: (camada1.width * 70) / tamanhoTelaReferencia,
+            altura: (camada1.width * 150) / tamanhoTelaReferencia
+        }
+
+        base_image = new Image();
+        base_image.src = 'images/dentes/18.png';
+        base_image.onload = function() {
+            contexto1.drawImage(base_image, valoresBase.x, valoresBase.y, valoresBase.largura, valoresBase.altura);
+        }
+
+        posicoesPadrao.margemXEntreDentes = (camada1.width * 8) / tamanhoTelaReferencia
+        posicoesPadrao.margemYEntreDentes = (camada1.width * 200) / tamanhoTelaReferencia
+        posicoesPadrao.posicaoYInicialDente = (camada1.width * 180) / tamanhoTelaReferencia
 
         tamanhoColuna = camada1.width / 16
-        tamanhoDente = tamanhoColuna - (2 * margemXEntreDentes)
+        tamanhoDente = tamanhoColuna - (2 * posicoesPadrao.margemXEntreDentes)
 
         dimensoesTrapezio = {
             baseMaior: tamanhoDente,
@@ -424,29 +454,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const getInfoDentePosicaoatual = (infoDentePosicaoAtual, x, y) => {
-        if (y >= posicaoYInicialDente && y <= posicaoYInicialDente + tamanhoDente) {
-            if (x >= margemXEntreDentes && x <= margemXEntreDentes + tamanhoDente) infoDentePosicaoAtual.numeroDente = 1;
-            else if (x >= (tamanhoDente + margemXEntreDentes * 3) && x <= (30 * margemXEntreDentes + 16 * tamanhoDente)) {
-                infoDentePosicaoAtual.indice = parseInt(x / (tamanhoDente + 2 * margemXEntreDentes), 10);
-                ini = (infoDentePosicaoAtual.indice * tamanhoDente) + (2 * margemXEntreDentes * infoDentePosicaoAtual.indice) + margemXEntreDentes;
+        if (y >= posicoesPadrao.posicaoYInicialDente && y <= posicoesPadrao.posicaoYInicialDente + tamanhoDente) {
+            if (x >= posicoesPadrao.margemXEntreDentes && x <= posicoesPadrao.margemXEntreDentes + tamanhoDente) infoDentePosicaoAtual.numeroDente = 1;
+            else if (x >= (tamanhoDente + posicoesPadrao.margemXEntreDentes * 3) && x <= (30 * posicoesPadrao.margemXEntreDentes + 16 * tamanhoDente)) {
+                infoDentePosicaoAtual.indice = parseInt(x / (tamanhoDente + 2 * posicoesPadrao.margemXEntreDentes), 10);
+                ini = (infoDentePosicaoAtual.indice * tamanhoDente) + (2 * posicoesPadrao.margemXEntreDentes * infoDentePosicaoAtual.indice) + posicoesPadrao.margemXEntreDentes;
                 fin = ini + tamanhoDente;
                 if (x >= ini && x <= fin) infoDentePosicaoAtual.numeroDente = infoDentePosicaoAtual.indice + 1
             }
-        } else if (y >= (tamanhoDente + margemYEntreDentes + posicaoYInicialDente) && y <= (2 * tamanhoDente + margemYEntreDentes + posicaoYInicialDente)) {
-            if (x >= margemXEntreDentes && x <= margemXEntreDentes + tamanhoDente) {
+        } else if (y >= (tamanhoDente + posicoesPadrao.margemYEntreDentes + posicoesPadrao.posicaoYInicialDente) && y <= (2 * tamanhoDente + posicoesPadrao.margemYEntreDentes + posicoesPadrao.posicaoYInicialDente)) {
+            if (x >= posicoesPadrao.margemXEntreDentes && x <= posicoesPadrao.margemXEntreDentes + tamanhoDente) {
                 infoDentePosicaoAtual.numeroDente = 17;
-            } else if (x >= (tamanhoDente + margemXEntreDentes * 3) && x <= (30 * margemXEntreDentes + 16 * tamanhoDente)) {
-                infoDentePosicaoAtual.indice = parseInt(x / (tamanhoDente + 2 * margemXEntreDentes), 10);
-                ini = (infoDentePosicaoAtual.indice * tamanhoDente) + (2 * margemXEntreDentes * infoDentePosicaoAtual.indice) + margemXEntreDentes;
+            } else if (x >= (tamanhoDente + posicoesPadrao.margemXEntreDentes * 3) && x <= (30 * posicoesPadrao.margemXEntreDentes + 16 * tamanhoDente)) {
+                infoDentePosicaoAtual.indice = parseInt(x / (tamanhoDente + 2 * posicoesPadrao.margemXEntreDentes), 10);
+                ini = (infoDentePosicaoAtual.indice * tamanhoDente) + (2 * posicoesPadrao.margemXEntreDentes * infoDentePosicaoAtual.indice) + posicoesPadrao.margemXEntreDentes;
                 fin = ini + tamanhoDente;
                 if (x >= ini && x <= fin) infoDentePosicaoAtual.numeroDente = infoDentePosicaoAtual.indice + 17
             }
         }
 
-        let px = x - ((infoDentePosicaoAtual.indice * tamanhoDente) + (2 * margemXEntreDentes * infoDentePosicaoAtual.indice) + margemXEntreDentes)
-        let py = y - posicaoYInicialDente
+        let px = x - ((infoDentePosicaoAtual.indice * tamanhoDente) + (2 * posicoesPadrao.margemXEntreDentes * infoDentePosicaoAtual.indice) + posicoesPadrao.margemXEntreDentes)
+        let py = y - posicoesPadrao.posicaoYInicialDente
 
-        if (infoDentePosicaoAtual.numeroDente > 16) py -= (margemYEntreDentes + tamanhoDente)
+        if (infoDentePosicaoAtual.numeroDente > 16) py -= (posicoesPadrao.margemYEntreDentes + tamanhoDente)
 
         if (py > 0 && py < (tamanhoDente / 4) && px > py && py < tamanhoDente - px) {
             infoDentePosicaoAtual.secao = 1;
@@ -505,5 +535,26 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.hide()
     }
 
-    window.addEventListener("resize", resizeCanvas)
+
+    const resizeCanvasPincel = () => {
+        camadaPincel.width = window.innerWidth - 25
+        const altura = (camadaPincel.width * alturaTelaReferencia) / tamanhoTelaReferencia
+        camadaPincel.height = altura
+
+        const dataImage = localStorage.getItem('desenho')
+
+        desenho = new Image();
+        desenho.src = dataImage;
+        desenho.onload = function() {
+            contextoPincel.clearRect(0, 0, camadaPincel.width, camadaPincel.height)
+            contextoPincel.drawImage(desenho, 0, 0, camadaPincel.width, camadaPincel.height);
+        }
+    }
+
+    resizeCanvasPincel()
+
+    window.addEventListener("resize", () => {
+        resizeCanvas()
+        resizeCanvasPincel()
+    })
 })
