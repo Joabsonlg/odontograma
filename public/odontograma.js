@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tamanhoTelaReferencia = 1895
     const alturaTelaReferencia = 872
 
-    const problemas = [{
+    const itensProcedimento = [{
         nome: 'Lesão branca ativa de cárie',
         cor: '#008000'
     }, {
@@ -70,6 +70,62 @@ document.addEventListener('DOMContentLoaded', () => {
         cor: '#008080'
     }]
 
+    let procedimentos = []
+    class Procedimento {
+        constructor() {
+            this.nome = null;
+            this.cor = null;
+            this.numeroDente = null;
+            this.faceDente = null;
+        }
+        valido() {
+            const campos = ['nome', 'cor', 'numeroDente', 'faceDente']
+            if (this.nome === null || this.nome === undefined || this.nome === '') return false
+            if (this.cor === null || this.cor === undefined || this.cor === '') return false
+            if (this.numeroDente === null || this.numeroDente === undefined || this.numeroDente === '') return false
+            if (this.faceDente === null || this.faceDente === undefined || this.faceDente === '') return false
+            return true
+        }
+        criaObjeto() {
+            return {
+                nome: this.nome,
+                cor: this.cor,
+                numeroDente: this.numeroDente,
+                faceDente: this.faceDente
+            }
+        }
+        limpar() {
+            this.nome = null;
+            this.cor = null;
+            this.numeroDente = null;
+            this.faceDente = null;
+        }
+        salvar() {
+            if (this.valido()) {
+                procedimentos.push(this.criaObjeto())
+                storage.save(procedimentos)
+            }
+        }
+        remover() {
+            procedimentos.splice(procedimentos.indexOf(this.criaObjeto()), 1)
+            storage.save(procedimentos)
+        }
+    }
+
+    let procedimento = new Procedimento()
+    procedimento.indice = null
+
+    const storage = {
+        fetch() {
+            return JSON.parse(localStorage.getItem('procedimentos') || '[]')
+        },
+        save(procedimentos) {
+            localStorage.setItem('procedimentos', JSON.stringify(procedimentos))
+            procedimentos = this.fetch()
+            return procedimentos
+        }
+    };
+
     let tamanhoColuna = camada1.width / 16
     let tamanhoDente = tamanhoColuna - (2 * posicoesPadrao.margemXEntreDentes)
 
@@ -83,23 +139,36 @@ document.addEventListener('DOMContentLoaded', () => {
         baseMenor: (tamanhoDente / 4) * 3
     }
 
-    let infoDentePosicaoAtual = {
-        numeroDente: 0,
-        secao: 0,
-        indice: 0,
-        cor: ''
-    }
-
     let numeroDentes = {
         superior: ['18', '17', '16', '15', '14', '13', '12', '11', '21', '22', '23', '24', '25', '26', '27', '28'],
         inferior: ['48', '47', '46', '45', '44', '43', '42', '41', '31', '32', '33', '34', '35', '36', '37', '38']
     }
 
+    let numeroDenteXOrdemExibicaoDente = new Array()
+
+    /**
+     *Define a posição inicial do dente no eixo x a partir de seu índice.
+     * 
+     * @example 
+     *   definePosicaoXInicialDente(5)
+     * 
+     * @param   {Number}    index      Parâmetro obrigatório
+     * @returns {Number}
+     */
     const definePosicaoXInicialDente = (index) => {
         if (index === 0) return (index * tamanhoDente) + (posicoesPadrao.margemXEntreDentes * index) + posicoesPadrao.margemXEntreDentes;
         else return (index * tamanhoDente) + (2 * posicoesPadrao.margemXEntreDentes * index) + posicoesPadrao.margemXEntreDentes;
     }
 
+    /**
+     * Desenha os dentes com suas respectivas faces.
+     * 
+     * @example 
+     *   desenharDente(20, 20)
+     * 
+     * @param   {Number} posicaoX      Parâmetro obrigatório
+     * @param   {Number} posicaoY      Parâmetro obrigatório
+     */
     const desenharDente = (posicaoX, posicaoY) => {
         /* 1º trapézio */
         contexto1.beginPath();
@@ -138,23 +207,31 @@ document.addEventListener('DOMContentLoaded', () => {
         contexto1.stroke();
     }
 
-    const marcarSecao = (contexto, numeroDente, secao) => {
-        numeroDente -= 1;
+    /**
+     * Faz o efeito 'hover' ao passar o mouse sobre alguma face.
+     * 
+     * @example 
+     *   marcarSecao(contexto, 2, 5)
+     * 
+     * @param   {Object} contexto                Parâmetro obrigatório
+     * @param   {Number} ordemExibicaoDente      Parâmetro obrigatório
+     * @param   {Number} face                    Parâmetro obrigatório
+     */
+    const marcarSecao = (contexto, ordemExibicaoDente, face) => {
         contexto.lineWidth = 2
-
         let cor_linha = 'yellow';
         let posicaoY = 0
 
-        if (numeroDente < 16) posicaoY = posicoesPadrao.posicaoYInicialDente;
+        if (ordemExibicaoDente < 16) posicaoY = posicoesPadrao.posicaoYInicialDente;
         else {
-            numeroDente -= 16;
+            ordemExibicaoDente -= 16;
             posicaoY = dimensoesTrapezio.baseMaior + posicoesPadrao.margemYEntreDentes + posicoesPadrao.posicaoYInicialDente;
         }
 
-        let posicaoX = definePosicaoXInicialDente(numeroDente)
+        let posicaoX = definePosicaoXInicialDente(ordemExibicaoDente - 1)
 
         /* 1ª zona */
-        if (secao === 1) {
+        if (face === 1) {
             if (contexto) {
                 contexto.fillStyle = cor_linha;
                 contexto.beginPath();
@@ -168,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         /* 2ª zona */
-        if (secao === 2) {
+        if (face === 2) {
             if (contexto) {
                 contexto.fillStyle = cor_linha;
                 contexto.beginPath();
@@ -183,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         /* 3ª zona */
-        if (secao === 3) {
+        if (face === 3) {
             if (contexto) {
                 contexto.fillStyle = cor_linha;
                 contexto.beginPath();
@@ -197,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         /* 4ª zona */
-        if (secao === 4) {
+        if (face === 4) {
             if (contexto) {
                 contexto.fillStyle = cor_linha;
                 contexto.beginPath();
@@ -211,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         /* 5ª zona(medio) */
-        if (secao === 5) {
+        if (face === 5) {
             if (contexto) {
                 contexto.fillStyle = cor_linha;
                 contexto.beginPath();
@@ -233,20 +310,15 @@ document.addEventListener('DOMContentLoaded', () => {
         x -= camada1.offsetLeft
         y -= camada1.offsetTop
 
-        infoDentePosicaoAtual = {
-            numeroDente: 0,
-            secao: 0,
-            indice: 0,
-            cor: ''
-        }
+        procedimento.limpar()
+        procedimento.indice = null
 
-        infoDentePosicaoAtual = getInfoDentePosicaoatual(infoDentePosicaoAtual, x, y)
-
-        if (infoDentePosicaoAtual.numeroDente > 0) {
-            if (infoDentePosicaoAtual.secao) {
+        procedimento = getInfoDentePosicaoatual(procedimento, x, y)
+        if (getOrdemExibicaoPorNumeroDente(procedimento.numeroDente) > 0) {
+            if (procedimento.faceDente) {
                 color = 'yellow';
                 contexto3.clearRect(0, 0, camada3.width, camada3.height)
-                marcarSecao(contexto3, infoDentePosicaoAtual.numeroDente, infoDentePosicaoAtual.secao);
+                marcarSecao(contexto3, getOrdemExibicaoPorNumeroDente(procedimento.numeroDente), procedimento.faceDente);
             } else contexto3.clearRect(0, 0, camada3.width, camada3.height)
         } else contexto3.clearRect(0, 0, camada3.width, camada3.height)
     }
@@ -256,27 +328,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     camada4.onclick = (event) => {
-        const color = 'teal'
-        const action = 'secao'
-
         let x = event.x
         let y = event.y
 
         x -= camada1.offsetLeft
         y -= camada1.offsetTop
 
-        infoDentePosicaoAtual = {
-            numeroDente: 0,
-            secao: 0,
-            indice: 0,
-            cor: ''
-        }
+        procedimento.limpar()
+        procedimento.indice = null
 
-        infoDentePosicaoAtual = getInfoDentePosicaoatual(infoDentePosicaoAtual, x, y)
+        procedimento = getInfoDentePosicaoatual(procedimento, x, y)
 
-        if (infoDentePosicaoAtual.secao) modal.show()
+        if (procedimento.faceDente) modal.show()
     }
 
+    /**
+     * Exibe o 'esqueleto' do odontograma (os dentes e sua numeração).
+     */
     const exibirEstrutura = () => {
         // document.querySelector("#canva-group").style.display = 'block'
 
@@ -319,11 +387,24 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
 
+    /**
+     * Define a posição inicial do quadrado no eixo x a partir de seu índice.
+     *
+     * @param {Number} index 
+     */
     const definePosicaoXInicialQuadrado = (index) => {
         if (index === 0) return (index * tamanhoDente) + posicoesPadrao.margemXEntreDentes;
         else return (index * tamanhoDente) + (2 * index * posicoesPadrao.margemXEntreDentes);
     }
 
+    /**
+     * Desenha o quadrado que informa o número do dente.
+     * 
+     * @example 
+     *   desenharQuadradoNumDente(quadrado)
+     * 
+     * @param   {Object} quadrado   Parâmetro obrigatório
+     */
     const desenharQuadradoNumDente = (quadrado) => {
         let tamanhoFonte = (40 * (quadrado.primeiroOuUltimoDente ? quadrado.largura + posicoesPadrao.margemXEntreDentes : quadrado.largura)) / 118.4375
         contexto1.font = `${tamanhoFonte}px arial`
@@ -331,8 +412,19 @@ document.addEventListener('DOMContentLoaded', () => {
         contexto1.fillText(quadrado.numeroDente, quadrado.position.x + tamanhoDente / 2.8, quadrado.position.y + (tamanhoDente / 2.5));
     }
 
-    const pintarSecao = (contexto, infoDentePosicaoAtual, cor_linha, cor_interior) => {
-        let numeroDente = infoDentePosicaoAtual.numeroDente - 1
+    /**
+     * Pinta a face do dente de acordo com o procedimento adicionado.
+     * 
+     * @example 
+     *   pintarFace(contexto, procedimento, 'black', 'yellow')
+     * 
+     * @param   {Object} contexto                Parâmetro obrigatório
+     * @param   {Object} procedimento   Parâmetro obrigatório
+     * @param   {String} cor_linha               Parâmetro obrigatório
+     * @param   {String} cor_interior            Parâmetro obrigatório
+     */
+    const pintarFace = (contexto, procedimento, cor_linha, cor_interior) => {
+        let numeroDente = getOrdemExibicaoPorNumeroDente(procedimento.numeroDente) - 1
         contexto.fillStyle = cor_interior
         contexto.strokeStyle = cor_linha
 
@@ -344,10 +436,15 @@ document.addEventListener('DOMContentLoaded', () => {
             posicaoY = dimensoesTrapezio.baseMaior + posicoesPadrao.margemYEntreDentes + posicoesPadrao.posicaoYInicialDente;
         }
 
+        const prcdms = getProcedimentosPorDente(procedimento.numeroDente, procedimento.faceDente)
+        const numeroDivisoes = prcdms.length - 1
+        let dividir = false
+        if (numeroDivisoes > 0) dividir = true
+
         let posicaoX = definePosicaoXInicialDente(numeroDente)
 
         /* 1ª zona */
-        if (infoDentePosicaoAtual.secao === 1) {
+        if (procedimento.faceDente === 1 && !dividir) {
             if (contexto) {
                 contexto.beginPath();
                 contexto.moveTo(posicaoX, posicaoY);
@@ -358,9 +455,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 contexto.fill();
                 contexto.stroke();
             }
+        } else if (procedimento.faceDente === 1 && dividir) {
+            if (contexto) {
+                const larguraDivisao = dimensoesTrapezio.baseMaior / (numeroDivisoes + 1)
+                prcdms.forEach((procedimentoItem, divisao) => {
+                    contexto.fillStyle = procedimentoItem.cor
+                    const ultimo = divisao === numeroDivisoes
+                    const primeiro = divisao === 0
+                    const dentroAreaTriangular = larguraDivisao * (divisao + 1) < dimensoesTrapezio.lateral
+                    contexto.beginPath();
+                    contexto.moveTo((larguraDivisao * divisao) + posicaoX, posicaoY);
+                    contexto.lineTo(larguraDivisao * (divisao + 1) + posicaoX, posicaoY);
+                    if (ultimo) {
+                        contexto.lineTo(dimensoesTrapezio.baseMenor + posicaoX, dimensoesTrapezio.lateral + posicaoY);
+                        contexto.lineTo((larguraDivisao * divisao) + posicaoX, dimensoesTrapezio.lateral + posicaoY);
+                    } else if (!primeiro) {
+                        contexto.lineTo(larguraDivisao * (divisao + 1) + posicaoX, dimensoesTrapezio.lateral + posicaoY);
+                        contexto.lineTo((larguraDivisao * divisao) + posicaoX, dimensoesTrapezio.lateral + posicaoY);
+                    } else {
+                        contexto.lineTo(dimensoesTrapezio.baseMenor + posicaoX, dimensoesTrapezio.lateral + posicaoY);
+                        contexto.lineTo(dimensoesTrapezio.lateral + posicaoX, dimensoesTrapezio.lateral + posicaoY);
+                    }
+                    contexto.closePath();
+                    contexto.fill();
+                    contexto.stroke();
+                })
+            }
         }
+
+
         /* 2ª zona */
-        if (infoDentePosicaoAtual.secao === 2) {
+        if (procedimento.faceDente === 2 && !dividir) {
             if (contexto) {
                 contexto.beginPath();
                 contexto.moveTo(dimensoesTrapezio.baseMenor + posicaoX, dimensoesTrapezio.lateral + posicaoY);
@@ -371,9 +496,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 contexto.fill();
                 contexto.stroke();
             }
+        } else if (procedimento.faceDente === 2 && dividir) {
+            if (contexto) {
+                const larguraDivisao = dimensoesTrapezio.baseMaior / (numeroDivisoes + 1)
+                prcdms.forEach((procedimentoItem, divisao) => {
+                    contexto.fillStyle = procedimentoItem.cor
+                    const ultimo = divisao === numeroDivisoes
+                    const primeiro = divisao === 0
+                    contexto.beginPath();
+                    contexto.moveTo(dimensoesTrapezio.baseMaior + posicaoX, (larguraDivisao * divisao) + posicaoY);
+                    contexto.lineTo(dimensoesTrapezio.baseMaior + posicaoX, dimensoesTrapezio.baseMaior + posicaoY);
+                    if (ultimo) {
+                        contexto.lineTo(dimensoesTrapezio.baseMenor + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
+                        contexto.lineTo(dimensoesTrapezio.baseMenor + posicaoX, (larguraDivisao * divisao) + posicaoY);
+                    } else if (!primeiro) {
+                        contexto.lineTo(dimensoesTrapezio.baseMenor + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
+                        contexto.lineTo(dimensoesTrapezio.baseMenor + posicaoX, (larguraDivisao * divisao) + posicaoY);
+                    } else {
+                        contexto.lineTo(dimensoesTrapezio.baseMenor + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
+                        contexto.lineTo(dimensoesTrapezio.baseMenor + posicaoX, dimensoesTrapezio.lateral + posicaoY);
+                    }
+                    contexto.closePath();
+                    contexto.fill();
+                    contexto.stroke();
+                })
+            }
         }
+
         /* 3ª zona */
-        if (infoDentePosicaoAtual.secao === 3) {
+        if (procedimento.faceDente === 3 && !dividir) {
             if (contexto) {
                 contexto.beginPath();
                 contexto.moveTo(dimensoesTrapezio.lateral + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
@@ -384,9 +535,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 contexto.fill();
                 contexto.stroke();
             }
+        } else if (procedimento.faceDente === 3 && dividir) {
+            if (contexto) {
+                const larguraDivisao = dimensoesTrapezio.baseMaior / (numeroDivisoes + 1)
+                prcdms.forEach((procedimentoItem, divisao) => {
+                    contexto.fillStyle = procedimentoItem.cor
+                    const ultimo = divisao === numeroDivisoes
+                    const primeiro = divisao === 0
+                    const dentroAreaTriangular = larguraDivisao * (divisao + 1) < dimensoesTrapezio.lateral
+                    contexto.beginPath();
+                    contexto.moveTo((larguraDivisao * divisao) + posicaoX, posicaoY + tamanhoDente);
+                    contexto.lineTo(larguraDivisao * (divisao + 1) + posicaoX, posicaoY + tamanhoDente);
+                    if (ultimo) {
+                        contexto.lineTo(dimensoesTrapezio.baseMenor + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
+                        contexto.lineTo((larguraDivisao * divisao) + posicaoX, dimensoesTrapezio.lateral + posicaoY + dimensoesTrapezio.baseMenor);
+                    } else if (!primeiro) {
+                        contexto.lineTo(larguraDivisao * (divisao + 1) + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
+                        contexto.lineTo((larguraDivisao * divisao) + posicaoX, posicaoY + dimensoesTrapezio.baseMenor);
+                    } else {
+                        contexto.lineTo((larguraDivisao * (divisao + 1)) + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
+                        contexto.lineTo(posicaoX, dimensoesTrapezio.lateral + posicaoY + dimensoesTrapezio.baseMenor);
+                    }
+                    contexto.closePath();
+                    contexto.fill();
+                    contexto.stroke();
+                })
+            }
         }
+
         /* 4ª zona */
-        if (infoDentePosicaoAtual.secao === 4) {
+        if (procedimento.faceDente === 4 && !dividir) {
             if (contexto) {
                 contexto.beginPath();
                 contexto.moveTo(posicaoX, posicaoY);
@@ -397,9 +575,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 contexto.fill();
                 contexto.stroke();
             }
+        } else if (procedimento.faceDente === 4 && dividir) {
+            if (contexto) {
+                const larguraDivisao = dimensoesTrapezio.baseMaior / (numeroDivisoes + 1)
+                prcdms.forEach((procedimentoItem, divisao) => {
+                    contexto.fillStyle = procedimentoItem.cor
+                    const ultimo = divisao === numeroDivisoes
+                    const primeiro = divisao === 0
+                    contexto.beginPath();
+                    contexto.moveTo(posicaoX, (larguraDivisao * divisao) + posicaoY);
+                    contexto.lineTo(posicaoX, larguraDivisao * (divisao + 1) + posicaoY);
+                    if (ultimo) {
+                        contexto.lineTo(posicaoX + dimensoesTrapezio.lateral, dimensoesTrapezio.baseMenor + posicaoY);
+                        contexto.lineTo(posicaoX + dimensoesTrapezio.lateral, (larguraDivisao * divisao) + posicaoY);
+                    } else if (!primeiro) {
+                        contexto.lineTo(posicaoX + dimensoesTrapezio.lateral, dimensoesTrapezio.baseMenor + posicaoY);
+                        contexto.lineTo(posicaoX + dimensoesTrapezio.lateral, (larguraDivisao * divisao) + posicaoY);
+                    } else {
+                        contexto.lineTo(posicaoX + dimensoesTrapezio.lateral, larguraDivisao * (divisao + 1) + posicaoY);
+                        contexto.lineTo(posicaoX + dimensoesTrapezio.lateral, dimensoesTrapezio.lateral + posicaoY);
+                    }
+                    contexto.closePath();
+                    contexto.fill();
+                    contexto.stroke();
+                })
+            }
         }
+
         /* 5ª zona(medio) */
-        if (infoDentePosicaoAtual.secao === 5) {
+        if (procedimento.faceDente === 5 && !dividir) {
             if (contexto) {
                 contexto.beginPath();
                 contexto.moveTo(dimensoesTrapezio.lateral + posicaoX, dimensoesTrapezio.lateral + posicaoY);
@@ -410,13 +614,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 contexto.fill();
                 contexto.stroke();
             }
+        } else if (procedimento.faceDente === 5 && dividir) {
+            if (contexto) {
+                const larguraDivisao = (dimensoesTrapezio.baseMenor - dimensoesTrapezio.lateral) / (numeroDivisoes + 1)
+                prcdms.forEach((procedimentoItem, divisao) => {
+                    contexto.fillStyle = procedimentoItem.cor
+                    contexto.beginPath();
+                    contexto.moveTo(dimensoesTrapezio.lateral + (divisao * larguraDivisao) + posicaoX, dimensoesTrapezio.lateral + posicaoY);
+                    contexto.lineTo(dimensoesTrapezio.lateral + ((divisao + 1) * larguraDivisao) + posicaoX, dimensoesTrapezio.lateral + posicaoY);
+                    contexto.lineTo(dimensoesTrapezio.lateral + ((divisao + 1) * larguraDivisao) + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
+                    contexto.lineTo(dimensoesTrapezio.lateral + (divisao * larguraDivisao) + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
+                    contexto.closePath();
+                    contexto.fill();
+                    contexto.stroke();
+                })
+            }
         }
     }
 
+    /**
+     * Redimensiona os canvas do odontograma e seu conteúdo proporcionalmente ao tamanho da janela.
+     */
     const resizeCanvas = () => {
-        if (window.innerWidth >= 800) {} else {
+        if (window.innerWidth >= 800) {
+            document.querySelector("#canva-group").style.display = 'display'
+        } else {
             alert("TELA MUITO PEQUENA! Acesse o odontrograma através de um dispositivo com uma tela maior!")
-            // document.querySelector("#canva-group").style.display = 'none'
+            document.querySelector("#canva-group").style.display = 'none'
         }
 
         camada1.width = camada2.width = camada3.width = camada4.width = window.innerWidth - 25
@@ -449,93 +673,75 @@ document.addEventListener('DOMContentLoaded', () => {
             baseMenor: (tamanhoDente / 4) * 3
         }
 
-        getMarcacoes()
+        exibeMarcacoes()
         exibirEstrutura()
     }
 
-    const getInfoDentePosicaoatual = (infoDentePosicaoAtual, x, y) => {
+    /**
+     * Retorna os dados do dente em relação a posição do mouse na tela
+     * 
+     * @example 
+     *   getInfoDentePosicaoatual(infoDentePosicaoAtual, 300, 255)
+     * 
+     * @param   {Object} infoDentePosicaoAtual   Parâmetro obrigatório
+     * @param   {Number} x                       Parâmetro obrigatório
+     * @param   {Number} y                       Parâmetro obrigatório
+     * @returns {Object}
+     */
+    const getInfoDentePosicaoatual = (procedimento, x, y) => {
         if (y >= posicoesPadrao.posicaoYInicialDente && y <= posicoesPadrao.posicaoYInicialDente + tamanhoDente) {
-            if (x >= posicoesPadrao.margemXEntreDentes && x <= posicoesPadrao.margemXEntreDentes + tamanhoDente) infoDentePosicaoAtual.numeroDente = 1;
+            if (x >= posicoesPadrao.margemXEntreDentes && x <= posicoesPadrao.margemXEntreDentes + tamanhoDente) procedimento.numeroDente = getNumeroDentePorOrdemExibicao(1);
             else if (x >= (tamanhoDente + posicoesPadrao.margemXEntreDentes * 3) && x <= (30 * posicoesPadrao.margemXEntreDentes + 16 * tamanhoDente)) {
-                infoDentePosicaoAtual.indice = parseInt(x / (tamanhoDente + 2 * posicoesPadrao.margemXEntreDentes), 10);
-                ini = (infoDentePosicaoAtual.indice * tamanhoDente) + (2 * posicoesPadrao.margemXEntreDentes * infoDentePosicaoAtual.indice) + posicoesPadrao.margemXEntreDentes;
+                procedimento.indice = parseInt(x / (tamanhoDente + 2 * posicoesPadrao.margemXEntreDentes), 10);
+                ini = (procedimento.indice * tamanhoDente) + (2 * posicoesPadrao.margemXEntreDentes * procedimento.indice) + posicoesPadrao.margemXEntreDentes;
                 fin = ini + tamanhoDente;
-                if (x >= ini && x <= fin) infoDentePosicaoAtual.numeroDente = infoDentePosicaoAtual.indice + 1
+                if (x >= ini && x <= fin) {
+                    procedimento.numeroDente = getNumeroDentePorOrdemExibicao(procedimento.indice + 1)
+                }
             }
         } else if (y >= (tamanhoDente + posicoesPadrao.margemYEntreDentes + posicoesPadrao.posicaoYInicialDente) && y <= (2 * tamanhoDente + posicoesPadrao.margemYEntreDentes + posicoesPadrao.posicaoYInicialDente)) {
             if (x >= posicoesPadrao.margemXEntreDentes && x <= posicoesPadrao.margemXEntreDentes + tamanhoDente) {
-                infoDentePosicaoAtual.numeroDente = 17;
+                procedimento.numeroDente = getNumeroDentePorOrdemExibicao(17);
             } else if (x >= (tamanhoDente + posicoesPadrao.margemXEntreDentes * 3) && x <= (30 * posicoesPadrao.margemXEntreDentes + 16 * tamanhoDente)) {
-                infoDentePosicaoAtual.indice = parseInt(x / (tamanhoDente + 2 * posicoesPadrao.margemXEntreDentes), 10);
-                ini = (infoDentePosicaoAtual.indice * tamanhoDente) + (2 * posicoesPadrao.margemXEntreDentes * infoDentePosicaoAtual.indice) + posicoesPadrao.margemXEntreDentes;
+                procedimento.indice = parseInt(x / (tamanhoDente + 2 * posicoesPadrao.margemXEntreDentes), 10);
+                ini = (procedimento.indice * tamanhoDente) + (2 * posicoesPadrao.margemXEntreDentes * procedimento.indice) + posicoesPadrao.margemXEntreDentes;
                 fin = ini + tamanhoDente;
-                if (x >= ini && x <= fin) infoDentePosicaoAtual.numeroDente = infoDentePosicaoAtual.indice + 17
+                if (x >= ini && x <= fin) procedimento.numeroDente = getNumeroDentePorOrdemExibicao(procedimento.indice + 17)
             }
         }
 
-        let px = x - ((infoDentePosicaoAtual.indice * tamanhoDente) + (2 * posicoesPadrao.margemXEntreDentes * infoDentePosicaoAtual.indice) + posicoesPadrao.margemXEntreDentes)
+        let px = x - ((procedimento.indice * tamanhoDente) + (2 * posicoesPadrao.margemXEntreDentes * procedimento.indice) + posicoesPadrao.margemXEntreDentes)
         let py = y - posicoesPadrao.posicaoYInicialDente
 
-        if (infoDentePosicaoAtual.numeroDente > 16) py -= (posicoesPadrao.margemYEntreDentes + tamanhoDente)
+        if (getOrdemExibicaoPorNumeroDente(procedimento.numeroDente) > 16) py -= (posicoesPadrao.margemYEntreDentes + tamanhoDente)
 
         if (py > 0 && py < (tamanhoDente / 4) && px > py && py < tamanhoDente - px) {
-            infoDentePosicaoAtual.secao = 1;
+            procedimento.faceDente = 1;
         } else if (px > (tamanhoDente / 4) * 3 && px < tamanhoDente && py < px && tamanhoDente - px < py) {
-            infoDentePosicaoAtual.secao = 2;
+            procedimento.faceDente = 2;
         } else if (py > (tamanhoDente / 4) * 3 && py < tamanhoDente && px < py && px > tamanhoDente - py) {
-            infoDentePosicaoAtual.secao = 3;
+            procedimento.faceDente = 3;
         } else if (px > 0 && px < (tamanhoDente / 4) && py > px && px < tamanhoDente - py) {
-            infoDentePosicaoAtual.secao = 4;
+            procedimento.faceDente = 4;
         } else if (px > (tamanhoDente / 4) && px < (tamanhoDente / 4) * 3 && py > (tamanhoDente / 4) && py < (tamanhoDente / 4) * 3) {
-            infoDentePosicaoAtual.secao = 5;
+            procedimento.faceDente = 5;
         }
 
-        return infoDentePosicaoAtual
+        return procedimento
     }
 
-    const getMarcacoes = () => {
-        let marcacoes = JSON.parse(localStorage.getItem('marcacoes_dentes') || '[]')
-
-        marcacoes.forEach(element => {
-            pintarSecao(contexto2, element, 'black', element.cor)
+    /**
+     * Exibe todos os procedimentos adicionados nos respectivos dentes e faces
+     */
+    const exibeMarcacoes = () => {
+        procedimentos.forEach(element => {
+            pintarFace(contexto2, element, 'black', element.cor)
         });
     }
 
-    resizeCanvas()
-
-    const options = problemas.map(problema => {
-        return `\n<option value='${problema.nome}'>${problema.nome}</option>`
-    })
-    document.querySelector("#problema").innerHTML += options
-
-    document.querySelector("#problema").addEventListener('change', (event) => {
-        let problema = event.target
-        if (problema.value) {
-            problema = problemas.find(problemaAtual => problemaAtual.nome === problema.value)
-            document.querySelector("#cor").value = problema.cor
-            if (problema.nome === 'Outro') document.querySelector("#cor").disabled = false
-            else document.querySelector("#cor").disabled = true
-        }
-    })
-
-    document.querySelector("#botaoSalvarMarcacao").onclick = (event) => {
-        let marcacoes = JSON.parse(localStorage.getItem('marcacoes_dentes') || '[]')
-        const marcacao = marcacoes.find(marcacao => marcacao.numeroDente === infoDentePosicaoAtual.numeroDente && marcacao.secao === infoDentePosicaoAtual.secao)
-        const procedimento = document.querySelector("#problema").value
-
-        infoDentePosicaoAtual.cor = document.querySelector("#cor").value
-        if (marcacao === undefined) marcacoes.push(infoDentePosicaoAtual)
-        else {
-            if (procedimento.value === 'Limpar seção') marcacoes.splice(marcacoes.indexOf(marcacao), 1)
-            else marcacoes[marcacoes.indexOf(marcacao)] = infoDentePosicaoAtual
-        }
-
-        localStorage.setItem('marcacoes_dentes', JSON.stringify(marcacoes))
-        pintarSecao(contexto2, infoDentePosicaoAtual, 'black', infoDentePosicaoAtual.cor)
-        modal.hide()
-    }
-
-
+    /**
+     * Redimensiona o canvas do pincel e seu conteúdo proporcionalmente ao tamanho da janela.
+     */
     const resizeCanvasPincel = () => {
         camadaPincel.width = window.innerWidth - 25
         const altura = (camadaPincel.width * alturaTelaReferencia) / tamanhoTelaReferencia
@@ -551,10 +757,97 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    resizeCanvasPincel()
+    /**
+     * Dá o start no odontograma, Desenhando a estrutura, carregando os dados, etc.
+     */
+    const iniciaOdontograma = () => {
+        const options = itensProcedimento.map(problema => {
+            return `\n<option value='${problema.nome}'>${problema.nome}</option>`
+        })
+        document.querySelector("#nomeProcedimento").innerHTML += options
+
+        document.querySelector("#nomeProcedimento").addEventListener('change', (event) => {
+            let procedimento = document.querySelector("#nomeProcedimento")
+            if (procedimento.value !== '') {
+                procedimento = itensProcedimento.find(problemaAtual => problemaAtual.nome === procedimento.value)
+                document.querySelector("#cor").value = procedimento.cor
+                if (procedimento.nome === 'Outro') {
+                    document.querySelector("#cor").disabled = false
+                    document.getElementById("colOutroProcedimento").style.display = 'block'
+                } else {
+                    document.querySelector("#cor").disabled = true
+                    document.getElementById("colOutroProcedimento").style.display = 'none'
+                }
+            } else {
+                document.querySelector("#cor").disabled = true
+                document.getElementById("colOutroProcedimento").style.display = 'none'
+            }
+        })
+
+        document.querySelector("#nomeProcedimento").dispatchEvent(new Event('change'))
+
+        document.querySelector("#botaoSalvarMarcacao").onclick = (event) => {
+            procedimento.nome = document.querySelector("#nomeProcedimento").value
+            procedimento.cor = document.querySelector("#cor").value
+
+            procedimento.salvar()
+
+            pintarFace(contexto2, procedimento, 'black', procedimento.cor)
+            modal.hide()
+        }
+
+        procedimentos = storage.fetch()
+
+        numeroDentes.superior.forEach((numero, index) => numeroDenteXOrdemExibicaoDente[numero] = index)
+        numeroDentes.inferior.forEach((numero, index) => numeroDenteXOrdemExibicaoDente[numero] = index + 16)
+
+        resizeCanvas()
+        resizeCanvasPincel()
+    }
+
+    /**
+     * Retorna a ordem de exibição do dente a partir de seu número.
+     * 
+     * @example 
+     *   getOrdemExibicaoPorNumeroDente(17); // 2
+     * 
+     * @param   {Number} numero   Parâmetro obrigatório
+     * @returns {Number}
+     */
+    const getOrdemExibicaoPorNumeroDente = (numero) => {
+        return numeroDenteXOrdemExibicaoDente[numero] + 1
+    }
+
+    /**
+     * Retorna o número do dente a partir de sua ordem de exibição.
+     * 
+     * @example 
+     *   getNumeroDentePorOrdemExibicao(2); // 17
+     * 
+     * @param   {Number} ordem   Parâmetro obrigatório
+     * @returns {Number}
+     */
+    const getNumeroDentePorOrdemExibicao = (ordem) => {
+        return numeroDenteXOrdemExibicaoDente.indexOf(ordem - 1)
+    }
+
+    /**
+     * Retorna Todos os procedimentos adicionados para o dente informado.
+     * 
+     * @example 
+     *   getProcedimentosPorDente(17); // [{...}]
+     * 
+     * @param   {Number} numero   Parâmetro obrigatório
+     * @returns {Array}
+     */
+    const getProcedimentosPorDente = (numero, face) => {
+        return procedimentos.filter(procedimento => procedimento.numeroDente === numero && procedimento.faceDente === face)
+    }
 
     window.addEventListener("resize", () => {
         resizeCanvas()
         resizeCanvasPincel()
     })
+
+    iniciaOdontograma()
 })
