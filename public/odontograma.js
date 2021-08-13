@@ -72,11 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let procedimentos = []
     class Procedimento {
-        constructor() {
-            this.nome = null;
-            this.cor = null;
-            this.numeroDente = null;
-            this.faceDente = null;
+        constructor(nome, cor, numeroDente, faceDente, informacoesAdicionais) {
+            this.nome = nome;
+            this.cor = cor;
+            this.numeroDente = numeroDente;
+            this.faceDente = faceDente;
+            this.informacoesAdicionais = informacoesAdicionais;
         }
         valido() {
             const campos = ['nome', 'cor', 'numeroDente', 'faceDente']
@@ -102,7 +103,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         salvar() {
             if (this.valido()) {
-                procedimentos.push(this.criaObjeto())
+                const procedimento = procedimentos.find(prc => prc.nome === this.nome && prc.numeroDente === this.numeroDente && prc.faceDente === this.faceDente)
+                if (procedimento === undefined) procedimentos.push(this.criaObjeto())
+                else procedimentos[procedimentos.indexOf(procedimento)] = this.criaObjeto()
                 storage.save(procedimentos)
             }
         }
@@ -340,6 +343,42 @@ document.addEventListener('DOMContentLoaded', () => {
         procedimento = getInfoDentePosicaoatual(procedimento, x, y)
 
         if (procedimento.faceDente) modal.show()
+        atualizaTabela()
+    }
+
+    const atualizaTabela = () => {
+        const tbody = document.getElementById('bodyProcedimentos')
+        let trs = ''
+        procedimentos.filter(prc => prc.numeroDente === procedimento.numeroDente && prc.faceDente === procedimento.faceDente).forEach(item => {
+            const tr = `
+                <tr>
+                    <td>
+                        ${item.nome}
+                    </td>
+                    <td>
+                        <input type="color" disabled class="form-control form-control-color" value="${item.cor}">
+                    </td>
+                    <td>
+                        ${item.informacoesAdicionais || 'NÃO INFORMADO'}
+                    </td>
+                    <td>
+                        <a onclick="apagar('${item.nome}', ${item.numeroDente}, ${item.faceDente})" class="btn btn-danger">
+                            <i class="far fa-trash-alt"></i>
+                        </a>
+                    </td>
+                </tr>
+            `
+            trs += tr
+        })
+        tbody.innerHTML = trs
+    }
+
+    window.apagar = (nome, numeroDente, faceDente) => {
+        const procd = procedimentos.find(prc => prc.nome === nome && prc.numeroDente === numeroDente && prc.faceDente === faceDente)
+        procedimentos.splice(procedimentos.indexOf(procd), 1)
+        storage.save(procedimentos)
+        atualizaTabela()
+        resizeCanvas()
     }
 
     /**
@@ -786,14 +825,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelector("#nomeProcedimento").dispatchEvent(new Event('change'))
 
-        document.querySelector("#botaoSalvarMarcacao").onclick = (event) => {
+        document.querySelector("#botaoAdicionar").onclick = (event) => {
             procedimento.nome = document.querySelector("#nomeProcedimento").value
             procedimento.cor = document.querySelector("#cor").value
 
             procedimento.salvar()
 
             pintarFace(contexto2, procedimento, 'black', procedimento.cor)
-            modal.hide()
+            atualizaTabela()
         }
 
         procedimentos = storage.fetch()

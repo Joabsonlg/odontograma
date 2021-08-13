@@ -64,7 +64,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalLabel">Adicionar marcação</h5>
+                    <h5 class="modal-title" id="modalLabel">Adicionar procedimento</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -72,7 +72,7 @@
                         <input type="hidden" id="procedimentosRemovidos" th:field="*{procedimentosRemovidos}">
                         <div id="procedimentosDiv"></div>
                         <div class="form-group col-md-12">
-                            <label for="nomeProcedimento">Nome procedimento</label>
+                            <label for="nomeProcedimento">Nome</label>
                             <i data-type="info" class="fas fa-info-circle fa-1x text-info" onclick="toast_message('.','info')" style="margin-left: 5px; cursor: pointer;"></i>
                             <select class="form-control" id="nomeProcedimento">
                                 <option selected value="">-- Selecione uma opção --</option>
@@ -86,7 +86,7 @@
                             <input id="outroProcedimento" class="form-control" type="text">
                         </div>
                         <div class="form-group col-12">
-                            <label for="exampleColorInput" class="form-label">Cor da marcação</label>
+                            <label for="exampleColorInput" class="form-label">Cor</label>
                             <i style="margin-left:5px;cursor: pointer;" class="alerta fas fa-info-circle fa-1x text-info" data-type="info" onclick="mensagens('.','info')"></i>
                             <input type="color" id="cor" disabled class="form-control form-control-color" value="#563d7c" title="Choose your color">
                         </div>
@@ -95,26 +95,26 @@
                             <i style="margin-left:5px;cursor: pointer;" class="alerta fas fa-info-circle fa-1x text-info" data-type="info" onclick="mensagens('.','info')"></i>
                             <textarea rows="5" id="informacoesAdicionais" maxlength="5000" class="form-control"></textarea>
                         </div>
-                        <div class="form-group col-md-1 d-inline" style="text-align: center; margin: auto;">
-                            <button onclick="addProcedimento()" class="form-control btn-sigsaude btnCorNovo" type="button">
+                        <div class="form-group col-md-1 d-inline mt-2" style="text-align: center; margin: auto;">
+                            <a id="botaoAdicionar" class="form-control btn-sigsaude btnCorNovo">
                                 <i class="fas fa-plus"></i>
-                            </button>
+                            </a>
                         </div>
                     </div>
-                    <div class="form-row" style="display: none;">
+                    <div class="form-row">
                         <div class="form-group col-md-12">
                             <div class="panel panel-default">
                                 <div class="table-responsive">
                                     <table class="table display dataTable table-bordered table-striped" id="tabelaTestesEspecificosForm">
                                         <thead>
                                             <tr>
-                                                <th>NOME PROCEDIMENTO</th>
-                                                <th>COR PROCEDIMENTO</th>
+                                                <th>NOME</th>
+                                                <th>COR</th>
                                                 <th>INFORMAÇÕES ADICIONAIS</th>
                                                 <th class="text-center">AÇÕES</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="bodyProcedimentos">
                                             <tr>
                                                 <td></td>
                                                 <td></td>
@@ -129,8 +129,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="botaoSalvarMarcacao">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
