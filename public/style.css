@@ -1,3 +1,26 @@
+:root {
+    --header-height: 3rem;
+    --nav-width: 68px;
+    --first-color: #00171b;
+    --first-color-light: #8ac7ca;
+    --secondary-color: #003d47;
+    --secondary-color-light: #0c9aba;
+    --white-color: #F7F6FB;
+    --body-font: 'Nunito', sans-serif;
+    --normal-font-size: 1rem;
+    --z-fixed: 100;
+    --backgound: linear-gradient(90deg, rgba(0, 25, 29, 1) 0%, var(--first-color) 35%, var(--secondary-color) 100%);
+}
+
+body {
+    position: relative;
+    font-family: var(--body-font);
+    font-size: var(--normal-font-size);
+    transition: .5s;
+    height: 100%;
+    /* background: var(--backgound); */
+}
+
 #camada1Odontograma {
     z-index: 1;
 }

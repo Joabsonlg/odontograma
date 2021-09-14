@@ -13,7 +13,7 @@
     <script src="odontograma.js"></script>
 </head>
 
-<body>
+<body class="dark-mode">
     <div id="control" class="container">
         <div class="row">
             <div class="col-12 mt-2">
@@ -153,112 +153,6 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script id="scriptForm">
-        // /*<![CDATA[*/
-        // let procedimentos = /*[[${procedimentos}]]*/ null;
-        // /*]]>*/
-
-        let precedimentosRemovidos = []
-
-        // $(document).ready(function() {
-        //     if (procedimentos === null) procedimentos = []
-
-        //     $("#tabelaPrecedimentosForm").DataTable({
-        //         "searching": false,
-        //         "ordering": false,
-        //         "info": false,
-        //         "paging": false,
-        //         "language": {
-        //             "emptyTable": "NENHUM REGISTRO ADICIONADO"
-        //         },
-        //     });
-        //     gerarListaPrecedimentos()
-        // })
-
-        function addPrecedimento() {
-            const idNOMEPROCEDIMENTO = "#nOMEPROCEDIMENTO"
-            const idCORPROCEDIMENTO = "#cORPROCEDIMENTO"
-            const idINFORMACOESADICIONAIS = "#iNFORMACOESADICIONAIS"
-
-
-            // A validade fica por sua conta
-            // if (fieldIsEmpty($(idNomeCampo)[0]))
-            // return toast_message("Preencha todos os campos referentes ao form para adicioná-lo.", "error");
-
-            let precedimento = {
-                'id': '',
-                'nOMEPROCEDIMENTO': $(idNOMEPROCEDIMENTO).val(),
-                'cORPROCEDIMENTO': $(idCORPROCEDIMENTO).val(),
-                'iNFORMACOESADICIONAIS': $(idINFORMACOESADICIONAIS).val(),
-
-            }
-
-            //Verificar validade aqui
-            const exists = procedimentos.find(el => el.nOMEPROCEDIMENTO === precedimento.nOMEPROCEDIMENTO) !== undefined
-            if (exists) return toast_message("Item já adicionado.", "error")
-
-            procedimentos.push(precedimento)
-            gerarListaPrecedimentos()
-
-            $("#nOMEPROCEDIMENTO").val("")
-            $("#cORPROCEDIMENTO").val("")
-            $("#iNFORMACOESADICIONAIS").val("")
-
-        }
-
-        function gerarListaPrecedimentos() {
-            let tabela = $("#tabelaPrecedimentosForm").DataTable();
-            tabela.clear().draw();
-
-            procedimentos.forEach((precedimento, i) => {
-                const click = precedimento.id === "" ? `removerPrecedimento(${parseInt(i + 1)}, false);return false` :
-                    `removerPrecedimento(${precedimento.id}, true);return false`
-                const tr = `<tr>
-                    <td>
-            <i class="icon-type icon-precedimento"></i>
-            <span>${precedimento.nOMEPROCEDIMENTO}</span>
-        </td>
-<td>
-            <i class="icon-type icon-precedimento"></i>
-            <span>${precedimento.cORPROCEDIMENTO}</span>
-        </td>
-<td>
-            <i class="icon-type icon-precedimento"></i>
-            <span>${precedimento.iNFORMACOESADICIONAIS}</span>
-        </td>
-
-                    <td class="d-flex justify-content-center">
-                        <a data-boundary="window" onclick="${click}"
-                        class="btn-sigsaude btnCorRemover" data-toggle="tooltip" style="margin-right:10px;" title="Remover">
-                            <i class="far fa-trash-alt"></i>
-                        </a>
-                     </td>
-                </tr>`
-                tabela.row.add($(tr))
-            })
-            tabela.draw();
-        }
-
-        function removerPrecedimento(index, edit) {
-            swal({
-                title: "Remoção do Precedimento",
-                text: "Você realmente deseja remover?",
-                buttons: ['Não', 'Sim'],
-                icon: "warning"
-            }).then((confirm) => {
-                if (confirm) {
-                    if (edit) {
-                        const precedimento = procedimentos.find(el => el.id === index)
-                        if (precedimento) {
-                            procedimentos.splice(procedimentos.indexOf(precedimento), 1)
-                            precedimentosRemovidos.push(index)
-                        }
-                    } else procedimentos.splice(parseInt(index - 1), 1)
-                    gerarListaPrecedimentos()
-                }
-            })
-        }
-    </script>
 </body>
 
 </html>

@@ -45,18 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
         nome: 'Restauração a ser trocada',
         cor: '#FFC0CB'
     }, {
-        nome: 'Extração indicada',
-        cor: '#F5F5DC'
-    }, {
-        nome: 'Necessidade de prótese fixa',
-        cor: '#A52A2A'
-    }, {
-        nome: 'Prótese fixa',
-        cor: '#FFA500'
-    }, {
-        nome: 'Dente ausente',
-        cor: '#800080'
-    }, {
         nome: 'Lesão cervical não- cariosa',
         cor: '#8B0000'
     }, {
@@ -92,7 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 nome: this.nome,
                 cor: this.cor,
                 numeroDente: this.numeroDente,
-                faceDente: this.faceDente
+                faceDente: this.faceDente,
+                informacoesAdicionais: this.informacoesAdicionais
             }
         }
         limpar() {
@@ -100,6 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.cor = null;
             this.numeroDente = null;
             this.faceDente = null;
+            this.informacoesAdicionais = null;
         }
         salvar() {
             if (this.valido()) {
@@ -173,6 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param   {Number} posicaoY      Parâmetro obrigatório
      */
     const desenharDente = (posicaoX, posicaoY) => {
+        contexto1.fillStyle = 'black';
+        contexto1.strokeStyle = 'black';
+
         /* 1º trapézio */
         contexto1.beginPath();
         contexto1.moveTo(posicaoX, posicaoY);
@@ -222,10 +215,10 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const marcarSecao = (contexto, ordemExibicaoDente, face) => {
         contexto.lineWidth = 2
-        let cor_linha = 'yellow';
+        let cor_linha = 'orange';
         let posicaoY = 0
 
-        if (ordemExibicaoDente < 16) posicaoY = posicoesPadrao.posicaoYInicialDente;
+        if (ordemExibicaoDente < 17) posicaoY = posicoesPadrao.posicaoYInicialDente;
         else {
             ordemExibicaoDente -= 16;
             posicaoY = dimensoesTrapezio.baseMaior + posicoesPadrao.margemYEntreDentes + posicoesPadrao.posicaoYInicialDente;
@@ -243,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 contexto.lineTo(dimensoesTrapezio.baseMenor + posicaoX, dimensoesTrapezio.lateral + posicaoY);
                 contexto.lineTo(dimensoesTrapezio.lateral + posicaoX, dimensoesTrapezio.lateral + posicaoY);
                 contexto.closePath();
-                contexto.strokeStyle = 'yellow';
+                contexto.strokeStyle = 'orange';
                 contexto.stroke();
             }
         }
@@ -258,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 contexto.lineTo(dimensoesTrapezio.baseMenor + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
                 contexto.closePath();
                 //contexto.fill();
-                contexto.strokeStyle = 'yellow';
+                contexto.strokeStyle = 'orange';
                 contexto.stroke();
             }
         }
@@ -272,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 contexto.lineTo(dimensoesTrapezio.baseMaior + posicaoX, dimensoesTrapezio.baseMaior + posicaoY);
                 contexto.lineTo(posicaoX, dimensoesTrapezio.baseMaior + posicaoY);
                 contexto.closePath();
-                contexto.strokeStyle = 'yellow';
+                contexto.strokeStyle = 'orange';
                 contexto.stroke();
             }
         }
@@ -286,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 contexto.lineTo(dimensoesTrapezio.lateral + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
                 contexto.lineTo(posicaoX, dimensoesTrapezio.baseMaior + posicaoY);
                 contexto.closePath();
-                contexto.strokeStyle = 'yellow';
+                contexto.strokeStyle = 'orange';
                 contexto.stroke();
             }
         }
@@ -300,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 contexto.lineTo(dimensoesTrapezio.baseMenor + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
                 contexto.lineTo(dimensoesTrapezio.lateral + posicaoX, dimensoesTrapezio.baseMenor + posicaoY);
                 contexto.closePath();
-                contexto.strokeStyle = 'yellow';
+                contexto.strokeStyle = 'orange';
                 contexto.stroke();
             }
         }
@@ -319,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
         procedimento = getInfoDentePosicaoatual(procedimento, x, y)
         if (getOrdemExibicaoPorNumeroDente(procedimento.numeroDente) > 0) {
             if (procedimento.faceDente) {
-                color = 'yellow';
+                color = 'orange';
                 contexto3.clearRect(0, 0, camada3.width, camada3.height)
                 marcarSecao(contexto3, getOrdemExibicaoPorNumeroDente(procedimento.numeroDente), procedimento.faceDente);
             } else contexto3.clearRect(0, 0, camada3.width, camada3.height)
@@ -455,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * Pinta a face do dente de acordo com o procedimento adicionado.
      * 
      * @example 
-     *   pintarFace(contexto, procedimento, 'black', 'yellow')
+     *   pintarFace(contexto, procedimento, 'black', 'orange')
      * 
      * @param   {Object} contexto                Parâmetro obrigatório
      * @param   {Object} procedimento   Parâmetro obrigatório
@@ -828,6 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector("#botaoAdicionar").onclick = (event) => {
             procedimento.nome = document.querySelector("#nomeProcedimento").value
             procedimento.cor = document.querySelector("#cor").value
+            procedimento.informacoesAdicionais = document.querySelector("#informacoesAdicionais").value
 
             procedimento.salvar()
 
